@@ -4,8 +4,10 @@ const debug = require('debug');
 const bodyParser = require('body-parser');
 const dbConfig = require('./config/database.config.js');
 const mongoose = require('mongoose');
-var mongodb = require('mongodb');
-var MongoClient = require('mongodb').MongoClient;
+// var mongodb = require('mongodb');
+// var MongoClient = require('mongodb').MongoClient;
+
+
 const cors = require('cors');
 
 const app = express();
@@ -27,17 +29,29 @@ var myLogger = (req,res,next)=>{
 };
 
 app.use(myLogger);
+
+const options = {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+    autoIndex: false, // Don't build indexes
+    reconnectTries: Number.MAX_VALUE, // Never stop trying to reconnect
+    reconnectInterval: 500, // Reconnect every 500ms
+    poolSize: 10, // Maintain up to 10 socket connections
+    // If not connected, return errors immediately rather than waiting for reconnect
+    bufferMaxEntries: 0,
+    connectTimeoutMS: 10000, // Give up initial connection after 10 seconds
+    socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+    family: 4 // Use IPv4, skip trying IPv6
+  };
+
 // Connecting to the database
-mongoose.connect(dbConfig.url, {
-    useNewUrlParser: true
-}).then(() => {
+mongoose.connect(dbConfig.url, options).then(() => {
     console.log("Successfully connected to the database");    
 }).catch(err => {
     console.log('Could not connect to the database. Exiting now...', err);
     process.exit();
 });
-
-
 
 app.get('/',(req,res)=> res.send("Hello world "));
 
